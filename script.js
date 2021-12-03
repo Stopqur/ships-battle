@@ -1,6 +1,10 @@
 let myField = document.querySelector('.main__myField')
+let cancelBtn = document.querySelector('.main__ships-cancel-btn')
 let eyeBtn = document.querySelector('.main__btnHide')
+let typeShipInputs = document.querySelectorAll('.main__ships-type-input')
+let outputType = document.querySelector('.output')
 
+let shipTypeValue
 let ships = {
     monoShips: [],
     doubleShips: [],
@@ -9,8 +13,9 @@ let ships = {
     blockCeils: []
 }
 
+hiddenCells()
 
-myField.addEventListener('click', monoShip)
+myField.addEventListener('click', switchTypeShip)
 
 myField.addEventListener('mouseover', function(event) {
     if(event.target.tagName !== 'TD') return;
@@ -44,25 +49,76 @@ myField.addEventListener('mouseout', function(event) {
     rowCells.map(item => item.classList.remove('cellHover'))
 })
 
+
+cancelBtn.addEventListener('click', () => {
+    for(let [type, arrShips] of Object.entries(ships)) {
+        for(ship of arrShips) {
+            if(type === 'blockCeils') {
+                if(!ship.classList.contains('cellHidden')) {
+                    ship.className = ''
+                }
+            } else {
+                arrShips = ship.map(item => {
+                    item.className = ''
+                    return item
+                })   
+            }  
+        }       
+        arrShips = []
+    }
+})
+
+function switchTypeShip(event) {
+    for(item of typeShipInputs) {
+        if (item.checked) {
+            shipTypeValue = item.value
+        }
+    }
+    switch (shipTypeValue) {
+        case '1':
+            setMono(event)
+            break;
+        case '2':
+            setDouble(event)
+            break;
+        case '3':
+            setTriple(event)
+            break;
+        case '4':
+            setQuadro(event)
+            break;
+        
+    }
+}
+
+function hiddenCells() {
+    for(let i = 0; i < 12; i++) {
+        myField.rows[0].cells[i].classList.add('cellHidden')
+        myField.rows[11].cells[i].classList.add('cellHidden')
+        myField.rows[i].cells[0].classList.add('cellHidden')
+        myField.rows[i].cells[11].classList.add('cellHidden')
+        ships.blockCeils = [...ships.blockCeils, myField.rows[0].cells[i], myField.rows[11].cells[i], myField.rows[i].cells[0], myField.rows[i].cells[11]]
+    }
+}
+
 //Setting ships on the field
-function monoShip(e) {
+function setMono(e) {
     setHorizontalShip(e, 1)
 }
 
-function doubleShip(e) {
+function setDouble(e) {
     setHorizontalShip(e, 2)
 }
 
-function tripleShip(e) {
+function setTriple(e) {
     setHorizontalShip(e, 3)
 }
 
-function fourthShip(e) {
+function setQuadro(e) {
     setHorizontalShip(e, 4)
 }
 
 function setHorizontalShip(e, typeShip) {
-    let flagBlock
     if(e.target.tagName !== 'TD') return;
     if(e.target.classList.contains('blockCells')) return;
 
@@ -70,184 +126,115 @@ function setHorizontalShip(e, typeShip) {
     const elem = e.target,
           elemRow = elem.parentElement.rowIndex,
           elemColumn = elem.cellIndex
-    
-    if (typeShip === 2) {
-        currentArrShips = ships.doubleShips
-    }
-    else if (typeShip === 3) {
-        currentArrShips = ships.tripleShips
-    }
-    else if (typeShip === 4) {
-        currentArrShips = ships.quadroShips
+    if(elemRow === 0 || elemColumn === 0 || elemRow === 11 || elemColumn === 11) {
+        console.log('установка запрещена')
     } else {
-        currentArrShips = ships.monoShips
-    }
-
-    if(!elem.classList.contains('cellBg')) {
-        flagBlock = true
-        if(shipLength === 1 || (!elem.nextElementSibling.classList.contains('cellBg') 
-        && elemColumn <= 10 - shipLength)) {
-            let cellShip = []
-            for(i = 0; i <= shipLength - 1; i++) {
-                if(!myField.rows[elemRow].cells[elemColumn + i].classList.contains('blockCells')) {
-                    console.log('yeah')
-                    cellShip.push(myField.rows[elemRow].cells[elemColumn + i])
-                    myField.rows[elemRow].cells[elemColumn + i].classList.add('cellBg')
-                    borderShip(elemRow, elemColumn, flagBlock)
+        switch (typeShip) {
+            case 1:
+                currentArrShips = ships.monoShips
+                break;
+            case 2:
+                currentArrShips = ships.doubleShips
+                break;
+            case 3:
+                currentArrShips = ships.tripleShips
+                break;
+            case 4:
+                currentArrShips = ships.quadroShips
+                break;    
+        }
+        
+        if(!elem.classList.contains('cellShipBg') && elemColumn <= 11 - shipLength) {
+            if(shipLength === 1 
+               || (!myField.rows[elemRow].cells[elemColumn + typeShip].classList.contains('cellShipBg'))) 
+            {
+                let cellShip = []
+                let flag
+                for(i = 0; i <= shipLength - 1; i++) {
+                    if(!myField.rows[elemRow].cells[elemColumn + shipLength - 1].classList.contains('blockCells')) {
+                        myField.rows[elemRow].cells[elemColumn + i].classList.add('cellShipBg')
+                        cellShip.push(myField.rows[elemRow].cells[elemColumn + i])
+                        flag = true
+                    } else {
+                        flag = false
+                    }
                 }
-            }
-            currentArrShips.push(cellShip)
-        } else {
-            alert('Невозможно установить')
-        }
-         
-    } 
-    //Условие удаления корабля
-    // else {
-    //     flagBlock = false
-    //     borderShip(elemRow, elemColumn, flagBlock)
-    //     currentArrShips = currentArrShips.filter(arrShip => {
-    //         if(arrShip.find(i => i === elem) !== undefined) {
-    //             arrShip = arrShip.map(item => item.classList.remove('cellBg'))
-    //             return false
-    //         } return true
-
-    //     }) 
-    // }
-    console.log(ships.monoShips)
-}
-
-
-function borderShip(rowIndex, columnIndex, flag) {
-    let leftCell = myField.rows[rowIndex].cells[columnIndex - 1]
-    let topCell = myField.rows[rowIndex - 1] 
-    let bottomCell = myField.rows[rowIndex + 1]
-    let rightCell = myField.rows[rowIndex].cells[columnIndex + 1]
+                if (flag) {
+                    borderShip(elemRow, elemColumn, shipLength)
+                    currentArrShips.push(cellShip)
+                }
     
-    if(flag) {
-        // if(leftCell === undefined 
-        // || topCell === undefined 
-        // || bottomCell === undefined 
-        // || rightCell === undefined) {
-        //     console.log('border')
-        // } 
-        if (rowIndex === 0 && columnIndex === 0) {
-            ships.blockCeils = [...ships.blockCeils, rightCell, bottomCell.cells[columnIndex]]
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            rightCell.classList.add('blockCells')
+            } else {
+                alert('Невозможно установить')
+            }         
         }
-        else if (rowIndex === 9 && columnIndex === 9) {
-            ships.blockCeils = [...ships.blockCeils, leftCell, topCell.cells[columnIndex]]
-            topCell.cells[columnIndex].classList.add('blockCells')
-            leftCell.classList.add('blockCells')
-        }
-        else if (rowIndex === 0 && columnIndex === 9) {
-            console.log('qqq', bottomCell.cells[columnIndex])
-            ships.blockCeils = [...ships.blockCeils, leftCell, bottomCell.cells[columnIndex]]
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            leftCell.classList.add('blockCells')
-        }
-        else if (rowIndex === 9 && columnIndex === 0) {
-            console.log(rowIndex, columnIndex)
-            ships.blockCeils = [...ships.blockCeils, rightCell, topCell.cells[columnIndex]]
-            topCell.cells[columnIndex].classList.add('blockCells')
-            rightCell.classList.add('blockCells')
-        }
-        else if (leftCell === undefined) {
-            console.log('sfsf')
-            ships.blockCeils = [...ships.blockCeils, rightCell, bottomCell.cells[columnIndex], topCell.cells[columnIndex]]
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            topCell.cells[columnIndex].classList.add('blockCells')
-            rightCell.classList.add('blockCells')
-        }
-        else if (topCell === undefined) {
-            ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, bottomCell.cells[columnIndex]]
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            rightCell.classList.add('blockCells')
-            leftCell.classList.add('blockCells')
-        }
-        else if (rightCell === undefined) {
-            ships.blockCeils = [...ships.blockCeils, leftCell, bottomCell.cells[columnIndex], topCell.cells[columnIndex]]
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            leftCell.classList.add('blockCells')
-            topCell.cells[columnIndex].classList.add('blockCells')
-        }
-        else if (bottomCell === undefined) {
-            ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, topCell.cells[columnIndex]]
-            rightCell.classList.add('blockCells')
-            leftCell.classList.add('blockCells')
-            topCell.cells[columnIndex].classList.add('blockCells')
-        }
-        else {
-            ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, bottomCell.cells[columnIndex], topCell.cells[columnIndex]]
-            console.log(ships.blockCeils)
-            leftCell.classList.add('blockCells')
-            topCell.cells[columnIndex].classList.add('blockCells')
-            bottomCell.cells[columnIndex].classList.add('blockCells')
-            rightCell.classList.add('blockCells')
-        }
+
     }
-    //Условие удаления границы корабля
-    //  else {
-    //     leftCell.classList.remove('blockCells')
-    //     topCell.cells[columnIndex].classList.remove('blockCells')
-    //     bottomCell.cells[columnIndex].classList.remove('blockCells')
-    //     rightCell.classList.remove('blockCells')
+     
+}
+
+
+function borderShip(row, column, type) {
+    let leftCell = myField.rows[row].cells[column - 1]
+    let topCell = myField.rows[row - 1] 
+    let bottomCell = myField.rows[row + 1]
+    let rightCell = myField.rows[row].cells[column + 1]
+    
+    //corners
+    // if (row === 0 && column === 0) {
+    //     bottomCell.cells[column].classList.add('blockCells')
+    //     rightCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, rightCell, bottomCell.cells[column]]
     // }
-
-}
-
-function borderShipDouble(rowIndex, columnIndex) {
-    let leftCell = myField.rows[rowIndex].cells[columnIndex - 1]
-    let topCell = myField.rows[rowIndex - 1] 
-    let bottomCell = myField.rows[rowIndex + 1]
-    let rightCell = myField.rows[rowIndex].cells[columnIndex + 2]
-
-    if(leftCell === undefined 
-    || topCell === undefined 
-    || bottomCell === undefined 
-    || rightCell === undefined) {
-        console.log('border')
-    } else {
-        ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, bottomCell.cells[columnIndex], topCell.cells[columnIndex]]
-        console.log(ships.blockCeils)
-        leftCell.classList.add('blockCells')
-        topCell.cells[columnIndex].classList.add('blockCells')
-        bottomCell.cells[columnIndex].classList.add('blockCells')
-        rightCell.classList.add('blockCells')
+    // else if (row === 9 && column === 9) {
+    //     topCell.cells[column].classList.add('blockCells')
+    //     leftCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, leftCell, topCell.cells[column]]
+    // }
+    // else if (row === 0 && column === 9) {
+    //     bottomCell.cells[column].classList.add('blockCells')
+    //     leftCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, leftCell, bottomCell.cells[column]]
+    // }
+    // else if (row === 9 && column === 0) {
+    //     topCell.cells[column].classList.add('blockCells')
+    //     rightCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, rightCell, topCell.cells[column]]
+    // }
+    // else if (leftCell === undefined) {
+    //     bottomCell.cells[column].classList.add('blockCells')
+    //     topCell.cells[column].classList.add('blockCells')
+    //     rightCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, rightCell, bottomCell.cells[column], topCell.cells[column]]
+    // }
+    // else if (topCell === undefined) {
+    //     bottomCell.cells[column].classList.add('blockCells')
+    //     rightCell.classList.add('blockCells')
+    //     leftCell.classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, bottomCell.cells[column]]
+    // }
+    // else if (rightCell === undefined) {
+    //     bottomCell.cells[column].classList.add('blockCells')
+    //     leftCell.classList.add('blockCells')
+    //     topCell.cells[column].classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, leftCell, bottomCell.cells[column], topCell.cells[column]]
+    // }
+    // else if (bottomCell === undefined) {
+    //     rightCell.classList.add('blockCells')
+    //     leftCell.classList.add('blockCells')
+    //     topCell.cells[column].classList.add('blockCells')
+    //     ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, topCell.cells[column]]
+    // }
+    
+    //facets
+    for(i = 0; i < type; i++) {
+        myField.rows[row - 1].cells[column + i].classList.add('blockCells')
+        myField.rows[row + 1].cells[column + i].classList.add('blockCells')
+        ships.blockCeils = [...ships.blockCeils, myField.rows[row - 1].cells[column + i], myField.rows[row + 1].cells[column + i]]
     }
+    leftCell.classList.add('blockCells')
+    myField.rows[row].cells[column + type].classList.add('blockCells')
+    ships.blockCeils = [...ships.blockCeils, leftCell, myField.rows[row].cells[column + type], bottomCell.cells[column], topCell.cells[column]]
+
+    ships.blockCeils = ships.blockCeils.filter((item, index, arr) => arr.indexOf(item) === index)
 }
-
-
-
-
-
-//for rollback
-// function secondShip(e) {
-//     if(e.target.tagName !== 'TD') return;
-//     const elem = e.target,
-//           elemRow = elem.parentElement.rowIndex,
-//           elemColumn = elem.cellIndex
-//     if(elemColumn < 9) {
-//         if(elem.classList.contains('cellBg')) {
-//             ships.doubleShips = ships.doubleShips.filter(arrShip => {
-//                 if(arrShip.find(i => i === elem) !== undefined) {
-//                     arrShip = arrShip.map(item => item.classList.remove('cellBg'))
-//                     return false
-//                 } return true
-
-//             })  
-//         } else {
-//             if(!elem.nextElementSibling.classList.contains('cellBg')) {
-//                 let cellShip = []
-//                 for(i = 0; i <= 1; i++) {
-//                     cellShip.push(myField.rows[elemRow].cells[elemColumn + i])
-//                     myField.rows[elemRow].cells[elemColumn + i].classList.add('cellBg')
-//                 }
-//                 ships.doubleShips.push(cellShip)
-//             } else {
-//                 alert('Невозможно установить')
-//             }
-//         }
-//     }  
-// }

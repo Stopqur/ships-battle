@@ -1,15 +1,17 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: rgb(6, 14, 138);
 }
-
 
 .cellHover {
-    background-color: rgba(201, 28, 129, 0.4);
+    background-color: rgb(72, 255, 0);
 }
 
-.cellBg {
+.cellHidden {
+    background-color: rgba(7, 73, 27, 0.4) !important;
+}
+
+.cellShipBg {
     background-color: red;
 }
 
@@ -17,23 +19,26 @@ body {
     background-color: rgb(24, 133, 24);
 }
 
+
 * {
     box-sizing: border-box;
 }
 
 h1 {
     text-align: center;
-    color: #fff;
+    color: #000;
     font-size: 36px;
     margin: 0;
     margin-bottom: 20px;
 }
 
 button {
-    background-color: transparent;
-    border: 0;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px 20px;
     cursor: pointer;
     color: white;
+    background-color: rgb(6, 14, 138);
 }
 
 table {
@@ -76,11 +81,15 @@ td {
     height: 100%;
 }
 
-.main__ships {
+.main__middle {
     flex-basis: 33%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .main__players {
+    flex-basis: 33%;
     text-align: center;
 }
 
@@ -88,3 +97,23 @@ td {
     background-color: #fff;
 }
 
+.main__ships-type {
+    display: flex;
+    align-items: center;
+}
+
+.main__ships-type-label {
+    display: flex;
+}
+
+.main__ships-type-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.main__ships {
+    padding-bottom: 50px;
+}
+.main__ships-type + .main__ships-type {
+    padding-top: 15px;
+}
