@@ -13,7 +13,7 @@ let ships = {
     blockCeils: []
 }
 
-hiddenCells()
+makeInactiveCells()
 
 myField.addEventListener('click', switchTypeShip)
 
@@ -91,7 +91,7 @@ function switchTypeShip(event) {
     }
 }
 
-function hiddenCells() {
+function makeInactiveCells() {
     for(let i = 0; i < 12; i++) {
         myField.rows[0].cells[i].classList.add('cellHidden')
         myField.rows[11].cells[i].classList.add('cellHidden')
@@ -103,22 +103,24 @@ function hiddenCells() {
 
 //Setting ships on the field
 function setMono(e) {
-    setHorizontalShip(e, 1)
+    setHorizontalShips(e, 1)
 }
 
 function setDouble(e) {
-    setHorizontalShip(e, 2)
+    setHorizontalShips(e, 2)
 }
 
 function setTriple(e) {
-    setHorizontalShip(e, 3)
+    setHorizontalShips(e, 3)
 }
 
 function setQuadro(e) {
-    setHorizontalShip(e, 4)
+    setVerticalShips(e, 4)
 }
 
-function setHorizontalShip(e, typeShip) {
+function setHorizontalShips(e, typeShip) {
+    let shipDirection = 'horizontal'
+
     if(e.target.tagName !== 'TD') return;
     if(e.target.classList.contains('blockCells')) return;
 
@@ -150,17 +152,28 @@ function setHorizontalShip(e, typeShip) {
             {
                 let cellShip = []
                 let flag
+                let clearCellFlag = []
+
                 for(i = 0; i <= shipLength - 1; i++) {
-                    if(!myField.rows[elemRow].cells[elemColumn + shipLength - 1].classList.contains('blockCells')) {
+                    if(!myField.rows[elemRow].cells[elemColumn + typeShip - i - 1].classList.contains('cellShipBg')
+                    && !myField.rows[elemRow].cells[elemColumn + typeShip - i - 1].classList.contains('blockCells')) {
+                        clearCellFlag = [...clearCellFlag, true]
+                    } else {
+                        clearCellFlag = [...clearCellFlag, false]
+                    }
+                }
+
+                flag = clearCellFlag.find(item => item === false)
+                for(i = 0; i <= shipLength - 1; i++) {
+                    if(flag === undefined) {
                         myField.rows[elemRow].cells[elemColumn + i].classList.add('cellShipBg')
                         cellShip.push(myField.rows[elemRow].cells[elemColumn + i])
-                        flag = true
                     } else {
                         flag = false
                     }
                 }
-                if (flag) {
-                    borderShip(elemRow, elemColumn, shipLength)
+                if (flag === undefined) {
+                    createBorderShip(elemRow, elemColumn, shipLength, shipDirection)
                     currentArrShips.push(cellShip)
                 }
     
@@ -168,17 +181,101 @@ function setHorizontalShip(e, typeShip) {
                 alert('Невозможно установить')
             }         
         }
-
-    }
-     
+    }    
 }
 
+function setVerticalShips(e, typeShip) {
+    let shipDirection = 'vertical'
 
-function borderShip(row, column, type) {
+    if(e.target.tagName !== 'TD') return;
+    if(e.target.classList.contains('blockCells')) return;
+    
+    let shipLength = typeShip
+    const elem = e.target,
+    elemRow = elem.parentElement.rowIndex,
+    elemColumn = elem.cellIndex
+    if(elemRow === 0 || elemColumn === 0 || elemRow === 11 || elemColumn === 11) {
+        console.log('установка запрещена')
+    } else {
+        switch (typeShip) {
+            case 1:
+                currentArrShips = ships.monoShips
+                break;
+            case 2:
+                currentArrShips = ships.doubleShips
+                break;
+            case 3:
+                currentArrShips = ships.tripleShips
+                break;
+            case 4:
+                currentArrShips = ships.quadroShips
+                break;    
+        }
+        if(!elem.classList.contains('cellShipBg') && elemRow <= 11 - shipLength) {
+            if(shipLength === 1
+                || (!myField.rows[elemRow + typeShip].cells[elemColumn].classList.contains('cellShipBg'))) 
+            {
+                let cellShip = []
+                let flag
+                let clearCellFlag = []
+                for(i = 0; i <= shipLength - 1; i++) {
+                    if(!myField.rows[elemRow + typeShip - i - 1].cells[elemColumn].classList.contains('cellShipBg')
+                    && !myField.rows[elemRow + typeShip - i - 1].cells[elemColumn].classList.contains('blockCells')) {
+                        clearCellFlag = [...clearCellFlag, true]
+                    } else {
+                        clearCellFlag = [...clearCellFlag, false]
+                    }
+                }
+                flag = clearCellFlag.find(item => item === false)
+                for(i = 0; i <= shipLength - 1; i++) {
+                    if(flag === undefined) {
+                        myField.rows[elemRow + i].cells[elemColumn].classList.add('cellShipBg')
+                        cellShip.push(myField.rows[elemRow].cells[elemColumn + i])
+                    } else {
+                        flag = false
+                    }
+                }
+                if (flag === undefined) {
+                    createBorderShip(elemRow, elemColumn, shipLength, shipDirection)
+                    currentArrShips.push(cellShip)
+                }
+            } else {
+                alert('Невозможно установить')
+            }  
+        }
+    }
+}
+
+function createBorderShip(row, column, type, shipDirection) {
     let leftCell = myField.rows[row].cells[column - 1]
     let topCell = myField.rows[row - 1] 
     let bottomCell = myField.rows[row + 1]
     let rightCell = myField.rows[row].cells[column + 1]
+
+    //facets
+    if(shipDirection === 'horizontal') {
+        for(i = 0; i < type; i++) {
+            myField.rows[row - 1].cells[column + i].classList.add('blockCells')
+            myField.rows[row + 1].cells[column + i].classList.add('blockCells')
+            ships.blockCeils = [...ships.blockCeils, myField.rows[row - 1].cells[column + i], myField.rows[row + 1].cells[column + i]]
+        }
+        leftCell.classList.add('blockCells')
+        myField.rows[row].cells[column + type].classList.add('blockCells')
+        ships.blockCeils = [...ships.blockCeils, leftCell, myField.rows[row].cells[column + type]]
+    
+        ships.blockCeils = ships.blockCeils.filter((item, index, arr) => arr.indexOf(item) === index)
+    } else {
+        for(i = 0; i < type; i++) {
+            myField.rows[row + i].cells[column - 1].classList.add('blockCells')
+            myField.rows[row + i].cells[column + 1].classList.add('blockCells')
+            ships.blockCeils = [...ships.blockCeils, myField.rows[row + i].cells[column - 1], myField.rows[row + i].cells[column + 1]]
+        }
+        topCell.cells[column].classList.add('blockCells')
+        myField.rows[row + type].cells[column].classList.add('blockCells')
+        ships.blockCeils = [...ships.blockCeils, topCell.cells[column], myField.rows[row + type].cells[column]]
+
+        ships.blockCeils = ships.blockCeils.filter((item, index, arr) => arr.indexOf(item) === index)
+    }
     
     //corners
     // if (row === 0 && column === 0) {
@@ -225,16 +322,4 @@ function borderShip(row, column, type) {
     //     topCell.cells[column].classList.add('blockCells')
     //     ships.blockCeils = [...ships.blockCeils, leftCell, rightCell, topCell.cells[column]]
     // }
-    
-    //facets
-    for(i = 0; i < type; i++) {
-        myField.rows[row - 1].cells[column + i].classList.add('blockCells')
-        myField.rows[row + 1].cells[column + i].classList.add('blockCells')
-        ships.blockCeils = [...ships.blockCeils, myField.rows[row - 1].cells[column + i], myField.rows[row + 1].cells[column + i]]
-    }
-    leftCell.classList.add('blockCells')
-    myField.rows[row].cells[column + type].classList.add('blockCells')
-    ships.blockCeils = [...ships.blockCeils, leftCell, myField.rows[row].cells[column + type], bottomCell.cells[column], topCell.cells[column]]
-
-    ships.blockCeils = ships.blockCeils.filter((item, index, arr) => arr.indexOf(item) === index)
 }
