@@ -3,6 +3,10 @@ let cancelBtn = document.querySelector('.main__ships-cancel-btn')
 let eyeBtn = document.querySelector('.main__btnHide')
 let typeShipInputs = document.querySelectorAll('.main__ships-type-input')
 let outputType = document.querySelector('.output')
+let directionBtn = document.querySelector('.main__ships-direction-btn')
+
+
+let shipDirection = 'horizontal'
 
 let shipTypeValue
 let ships = {
@@ -68,6 +72,20 @@ cancelBtn.addEventListener('click', () => {
     }
 })
 
+directionBtn.addEventListener('click', function() {
+    if(shipDirection === 'horizontal') {
+        shipDirection = 'vertical'
+        directionBtn.innerHTML = 'Горизонтально'
+    } else {
+        shipDirection = 'horizontal'
+        directionBtn.innerHTML = 'Вертикально'
+    }
+})
+
+
+
+
+
 function switchTypeShip(event) {
     for(item of typeShipInputs) {
         if (item.checked) {
@@ -103,23 +121,39 @@ function makeInactiveCells() {
 
 //Setting ships on the field
 function setMono(e) {
-    setHorizontalShips(e, 1)
+    if(shipDirection === 'horizontal') {
+        setHorizontalShips(e, 1)
+    } else {
+        setVerticalShips(e, 1)
+    } 
 }
 
 function setDouble(e) {
-    setHorizontalShips(e, 2)
+    if(shipDirection === 'horizontal') {
+        setHorizontalShips(e, 2)
+    } else {
+        setVerticalShips(e, 2)
+    }
 }
 
 function setTriple(e) {
-    setHorizontalShips(e, 3)
+    if(shipDirection === 'horizontal') {
+        setHorizontalShips(e, 3)
+    } else {
+        setVerticalShips(e, 3)
+    }
 }
 
 function setQuadro(e) {
-    setVerticalShips(e, 4)
+    if(shipDirection === 'horizontal') {
+        setHorizontalShips(e, 4)
+    } else {
+        setVerticalShips(e, 4)
+    }
 }
 
 function setHorizontalShips(e, typeShip) {
-    let shipDirection = 'horizontal'
+    // shipDirection = 'horizontal'
 
     if(e.target.tagName !== 'TD') return;
     if(e.target.classList.contains('blockCells')) return;
@@ -173,7 +207,7 @@ function setHorizontalShips(e, typeShip) {
                     }
                 }
                 if (flag === undefined) {
-                    createBorderShip(elemRow, elemColumn, shipLength, shipDirection)
+                    createBorderShip(elemRow, elemColumn, shipLength)
                     currentArrShips.push(cellShip)
                 }
     
@@ -185,7 +219,7 @@ function setHorizontalShips(e, typeShip) {
 }
 
 function setVerticalShips(e, typeShip) {
-    let shipDirection = 'vertical'
+    // shipDirection = 'vertical'
 
     if(e.target.tagName !== 'TD') return;
     if(e.target.classList.contains('blockCells')) return;
@@ -236,7 +270,7 @@ function setVerticalShips(e, typeShip) {
                     }
                 }
                 if (flag === undefined) {
-                    createBorderShip(elemRow, elemColumn, shipLength, shipDirection)
+                    createBorderShip(elemRow, elemColumn, shipLength)
                     currentArrShips.push(cellShip)
                 }
             } else {
@@ -246,7 +280,7 @@ function setVerticalShips(e, typeShip) {
     }
 }
 
-function createBorderShip(row, column, type, shipDirection) {
+function createBorderShip(row, column, type) {
     let leftCell = myField.rows[row].cells[column - 1]
     let topCell = myField.rows[row - 1] 
     let bottomCell = myField.rows[row + 1]

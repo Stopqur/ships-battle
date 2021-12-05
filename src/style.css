@@ -41,6 +41,9 @@ button {
     background-color: rgb(6, 14, 138);
 }
 
+
+
+
 table {
     border-spacing: 0px;
     margin: 0;
@@ -116,4 +119,8 @@ td {
 }
 .main__ships-type + .main__ships-type {
     padding-top: 15px;
+}
+
+.main__ships-direction-btn {
+    width: 150px;
 }
