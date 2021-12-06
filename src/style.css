@@ -1,6 +1,29 @@
+:root {
+    --container-width: 1180px;
+}
+
 body {
     margin: 0;
     padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.wrapper {
+    padding-left: calc(50% - var(--container-width) / 2);
+    padding-right: calc(50% - var(--container-width) / 2);
+}
+
+.sectionNone {
+    display: none;
+}
+
+p {
+    margin: 0;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 
 .cellHover {
@@ -12,16 +35,11 @@ body {
 }
 
 .cellShipBg {
-    background-color: red;
+    background-color: rgb(240, 50, 2);
 }
 
 .blockCells {
-    background-color: rgb(24, 133, 24);
-}
-
-
-* {
-    box-sizing: border-box;
+    background-color: rgb(143, 163, 160);
 }
 
 h1 {
@@ -33,23 +51,25 @@ h1 {
 }
 
 button {
+    max-width: 200px;
     border: 1px solid black;
     border-radius: 5px;
     padding: 10px 20px;
     cursor: pointer;
     color: white;
     background-color: rgb(6, 14, 138);
+    font-size: 14px;
 }
 
-
+button + button {
+    margin-left: 20px;
+}
 
 
 table {
     border-spacing: 0px;
     margin: 0;
 }
-
-
 
 td {
     width: 30px;
@@ -59,14 +79,21 @@ td {
 
 .main {
     position: relative;
-    padding: 20px 40px;
+    padding-top: 20px;
     height: 100vh;
     background-size: 100%;
 }
 
+.main__title {
+    transform: rotate(-90deg);
+
+}
 .fields {
+    padding: 0 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 20px;
 }
 
 .main__btnHide {
@@ -84,7 +111,8 @@ td {
     height: 100%;
 }
 
-.main__middle {
+.main__set-ships {
+    margin-left: 50px;  
     flex-basis: 33%;
     display: flex;
     flex-direction: column;
@@ -96,7 +124,7 @@ td {
     text-align: center;
 }
 
-.main__myField {
+.battle-field {
     background-color: #fff;
 }
 
@@ -115,12 +143,32 @@ td {
 }
 
 .main__ships {
-    padding-bottom: 50px;
+    padding-bottom: 30px;
 }
 .main__ships-type + .main__ships-type {
-    padding-top: 15px;
+    padding-top: 7px;
 }
 
-.main__ships-direction-btn {
-    width: 150px;
+.main__battle-btn {
+    display: block;
+    margin: 0 auto;
+    background-color: rgb(240, 50, 2);
+}
+
+.main__enemyField {
+    margin-left: 70px;
+}
+
+.main__set-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+
+.main__set-buttons-build {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
