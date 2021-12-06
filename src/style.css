@@ -26,11 +26,13 @@ p {
     margin-bottom: 20px;
 }
 
+
+
+
 .cellHover {
     background-color: rgb(72, 255, 0);
 }
-
-.cellHidden {
+.cellBorder {
     background-color: rgba(7, 73, 27, 0.4) !important;
 }
 
@@ -42,6 +44,13 @@ p {
     background-color: rgb(143, 163, 160);
 }
 
+.cellHidden {
+    background-color: #fff;
+}
+
+
+
+
 h1 {
     text-align: center;
     color: #000;
@@ -52,7 +61,7 @@ h1 {
 
 button {
     max-width: 200px;
-    border: 1px solid black;
+    border: 1px solid rgb(72, 255, 0);
     border-radius: 5px;
     padding: 10px 20px;
     cursor: pointer;
@@ -86,8 +95,11 @@ td {
 
 .main__title {
     transform: rotate(-90deg);
+    transition: 2s;
 
 }
+
+
 .fields {
     padding: 0 20px;
     display: flex;
