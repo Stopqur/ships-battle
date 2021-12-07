@@ -60,7 +60,7 @@ h1 {
 }
 
 button {
-    max-width: 200px;
+    width: 150px;
     border: 1px solid rgb(72, 255, 0);
     border-radius: 5px;
     padding: 10px 20px;
@@ -74,6 +74,9 @@ button + button {
     margin-left: 20px;
 }
 
+.main__random-btn--width {
+    width: auto;
+}
 
 table {
     border-spacing: 0px;

@@ -12,13 +12,23 @@ let fieldsSection = document.querySelector('.fields')
 let myRandomBtn = document.querySelector('#my-random-btn')
 let gameName = document.querySelector('.main__title')
 
-
 let shipDirection = 'horizontal'
 
 let flagSameCell
 
 let shipTypeValue
+
 let ships = {
+    monoShips: [],
+    doubleShips: [],
+    tripleShips: [],
+    quadroShips: [],
+    blockCeils: [],
+    attacked: [],
+    killed: []
+}
+
+let enemyShips = {
     monoShips: [],
     doubleShips: [],
     tripleShips: [],
@@ -27,21 +37,29 @@ let ships = {
     attacked: []
 }
 
-let enemyShips = {
-    monoShips: [],
-    doubleShips: [],
-    tripleShips: [],
-    quadroShips: [],
-    blockCeils: []
-}
-
-
-
 makeInactiveCells()
 
 myField.addEventListener('click', switchTypeShip)
 
-fields.forEach(item => item.addEventListener('mouseover', function(event) {
+fields.forEach(item => item.addEventListener('mouseover', fieldMouseOn))
+
+fields.forEach(item => item.addEventListener('mouseout', fieldMouseOut))
+
+cancelBtn.addEventListener('click', deleteAllShips)
+
+directionBtn.addEventListener('click', setDirectionForBtn)
+
+myRandomBtn.addEventListener('click', () => {
+    randomSettingShips(myField)
+})
+
+battleBtn.addEventListener('click', startBattle)
+
+enemyField.addEventListener('click', battleOn)
+
+
+
+function fieldMouseOn(event) {
     if(event.target.tagName !== 'TD') return;
     const elem = event.target
     const columnCells = [...elem.parentElement.parentElement.children]
@@ -55,9 +73,9 @@ fields.forEach(item => item.addEventListener('mouseover', function(event) {
     })
     const rowCells = [...elem.parentNode.children]
     rowCells.map(item => item.classList.add('cellHover'))
-}))
+}
 
-fields.forEach(item => item.addEventListener('mouseout', function(event) {
+function fieldMouseOut(event) {
     if(event.target.tagName !== 'TD') return;
     const elem = event.target
     const columnCells = [...elem.parentElement.parentElement.children]
@@ -69,79 +87,22 @@ fields.forEach(item => item.addEventListener('mouseout', function(event) {
     })
     const rowCells = [...elem.parentNode.children]
     rowCells.map(item => item.classList.remove('cellHover'))
-}))
-
-
-cancelBtn.addEventListener('click', deleteAllShips)
-
-function deleteAllShips() {
-    for(let [type, arrShips] of Object.entries(ships)) {
-        for(ship of arrShips) {
-            if(type === 'blockCeils' && !ship.classList.contains('cellBorder')) {
-                ship.className = ''
-            } 
-            else if (type !== 'blockCeils') {
-                arrShips = ship.map(item => {
-                    item.className = ''
-                    return item
-                }) 
-            }
-        }    
-        ships[`${type}`] = [] 
-    }
 }
 
-directionBtn.addEventListener('click', function() {
-    console.log(ships)
-    if(shipDirection === 'horizontal') {
-        shipDirection = 'vertical'
-        directionBtn.innerHTML = 'Горизонтально'
-    } else {
-        shipDirection = 'horizontal'
-        directionBtn.innerHTML = 'Вертикально'
-    }
-    computerAttack()
-})
+function myAttack(e) {
+    let elem = e.target
+    let direction
 
-myRandomBtn.addEventListener('click', () => {
-    randomSettingShips(myField)
-})
-
-battleBtn.addEventListener('click', function() {
-    if(ships.monoShips.length === 4 
-    && ships.doubleShips.length === 3
-    && ships.tripleShips.length === 2
-    && ships.quadroShips.length === 1) 
-    {
-        buildingSection.className = 'sectionNone'
-        enemyField.classList.remove('sectionNone')
-        fieldsSection.style.justifyContent = 'start'
-        gameName.style.transform = 'rotate(270deg)'
-        gameName.style.color = 'rgb(240, 50, 2)'
-        randomSettingShips(enemyField)
-        for(let i = 1; i < enemyField.rows.length - 1; i++) {
-            for(let j = 1; j < enemyField.rows[i].cells.length - 1; j++)
-            enemyField.rows[i].cells[j].classList.add('cellHidden')
-        }
-    } else {
-
-        alert('Установите все корабли')
-    }
-})
-
-function myAttack() {
-    enemyField.addEventListener('click', (e) => {
-        const elem = e.target,
-          row = elem.parentElement.rowIndex,
-          column = elem.cellIndex
-          let direction
-    if (e.target.classList.contains('cellShipBg')) {
+    if (e.target.classList.contains('cellShipBg') && e.target.classList.contains('cellHidden')) {
         console.log(e.target)
         e.target.classList.remove('cellHidden')
+        enemyShips.attacked.push(e.target)
+
         let counter = 0
         let arrDirection =[]
+
         for(let [type, arrShips] of Object.entries(enemyShips)) {
-            if (type !== 'blockCeils') {
+            if (type !== 'blockCeils' && type !== 'attacked') {
                 for(ship of arrShips) {
                     if(ship.find(item => item === elem)) {
                         console.log(ship)
@@ -173,32 +134,92 @@ function myAttack() {
     } else {
         console.log('not ship')
     }
-})
-}
-
-
-
-
-function computerAttack() {
-    randomHorizontal = getRandomInt(1, 11),
-    randomVertical = getRandomInt(1, 11),
-    elementTarget = myField.rows[randomVertical].cells[randomHorizontal]
-    if(!ships.attacked.find(item => item === elementTarget) 
-    && elementTarget.classList.contains('cellShipBg')) {
-        elementTarget.style.backgroundColor = 'black'
-        ships.attacked.push(elementTarget)
-        console.log('attacked', elementTarget)
-
+    console.log(enemyShips.attacked.length)
+    if(enemyShips.attacked.length === 20 && ships.attacked.length < 20) {
+        alert('You won!')
     }
 }
 
-
-
-console.log()
-function battle(callback) {
-    myAttack()
+function computerAttack() {
+    let randomHorizontal = getRandomInt(1, 11)
+    let randomVertical = getRandomInt(1, 11)
+    let elementTarget = myField.rows[randomVertical].cells[randomHorizontal]
+    if(ships.attacked.find(item => elementTarget === item) && ships.attacked.length > 0) {
+        while(ships.attacked.find(item => elementTarget === item)) {
+            randomHorizontal = getRandomInt(1, 11)
+            randomVertical = getRandomInt(1, 11)
+            elementTarget = myField.rows[randomVertical].cells[randomHorizontal]
+        }
+        if(elementTarget.classList.contains('cellShipBg')) {
+            ships.attacked.push(elementTarget)
+            ships.killed.push(elementTarget)
+            elementTarget.style.backgroundColor = 'black'
+        } else {
+            ships.attacked.push(elementTarget)
+            elementTarget.style.backgroundColor = 'rgb(6, 14, 138)'
+            console.log('copy element')
+        }
+    }
+    else {
+        if(elementTarget.classList.contains('cellShipBg')) {
+            ships.attacked.push(elementTarget)
+            ships.killed.push(elementTarget)
+            elementTarget.style.backgroundColor = 'black'
+            console.log('unique element')
+        } else {
+            ships.attacked.push(elementTarget)
+            elementTarget.style.backgroundColor = 'rgb(6, 14, 138)'
+        }
+    }
+    console.log('ships.killed', ships.killed.length)
+    
+    if(ships.killed.length === 20 && enemyShips.attacked.length < 20) {
+        alert('computer won!')
+    }
 }
 
+function battleOn(e) {
+    myAttack(e)
+    setTimeout(computerAttack, 1000)
+}
+
+function startBattle() {
+    if(ships.monoShips.length === 4 
+        && ships.doubleShips.length === 3
+        && ships.tripleShips.length === 2
+        && ships.quadroShips.length === 1) 
+    {
+        buildingSection.className = 'sectionNone'
+        enemyField.classList.remove('sectionNone')
+        fieldsSection.style.justifyContent = 'start'
+        gameName.style.transform = 'rotate(270deg)'
+        gameName.style.color = 'rgb(240, 50, 2)'
+        randomSettingShips(enemyField)
+        for(let i = 1; i < enemyField.rows.length - 1; i++) {
+            for(let j = 1; j < enemyField.rows[i].cells.length - 1; j++)
+            enemyField.rows[i].cells[j].classList.add('cellHidden')
+        }
+    } else {
+        alert('Установите все корабли')
+    }
+}
+
+function deleteAllShips() {
+    for(let [type, arrShips] of Object.entries(ships)) {
+        for(ship of arrShips) {
+            if(type === 'blockCeils' && !ship.classList.contains('cellBorder')) {
+                ship.className = ''
+            } 
+            else if (type !== 'blockCeils') {
+                arrShips = ship.map(item => {
+                    item.className = ''
+                    return item
+                }) 
+            }
+        }    
+        ships[`${type}`] = [] 
+    }
+}
 
 function randomSettingShips(field) {
     let objectShips
@@ -219,6 +240,16 @@ function setDirection() {
     } else {
         shipDirection = 'vertical'
         return shipDirection
+    }
+}
+
+function setDirectionForBtn() {
+    if(shipDirection === 'horizontal') {
+        shipDirection = 'vertical'
+        directionBtn.innerHTML = 'Горизонтально'
+    } else {
+        shipDirection = 'horizontal'
+        directionBtn.innerHTML = 'Вертикально'
     }
 }
 
@@ -250,6 +281,7 @@ function randomSettingEachType(type, field, objectShips) {
             elementTarget = field.rows[randomVertical].cells[randomHorizontal],
             flag = true
         while(typeShip.length < i + 1) {
+            console.log('while')
             setDirection()
             if(flag) {
                 toggleTypeShip(elementTarget, randomVertical, randomHorizontal, field, objectShips, shipDirection)
