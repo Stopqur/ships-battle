@@ -94,7 +94,6 @@ function myAttack(e) {
     let direction
 
     if (e.target.classList.contains('cellShipBg') && e.target.classList.contains('cellHidden')) {
-        console.log(e.target)
         e.target.classList.remove('cellHidden')
         enemyShips.attacked.push(e.target)
 
@@ -110,32 +109,25 @@ function myAttack(e) {
                             if(ceilShip.classList.contains('cellHidden')) {
                                 counter += 1
                             }
-                            console.log('sf')
                             arrDirection.push(ceilShip.parentElement.rowIndex)
                         }
                         if (counter === 0) {
                             if(arrDirection[0] === arrDirection[1]) {
-                                console.log('horizontal')
                                 direction = 'horizontal'
                                 createBorderShip(ship[0].parentElement.rowIndex, ship[0].cellIndex, ship.length, enemyField, enemyShips, direction)
 
                             } else {
                                 direction = 'vertical'
                                 createBorderShip(ship[0].parentElement.rowIndex, ship[0].cellIndex, ship.length, enemyField, enemyShips, direction)
-                                console.log('vertical')
                             }
-
                         }
-                        console.log(arrDirection)
                     }
                 }
             }
         }
-    } else {
-        console.log('not ship')
-    }
-    console.log(enemyShips.attacked.length)
-    if(enemyShips.attacked.length === 20 && ships.attacked.length < 20) {
+    } 
+
+    if(enemyShips.attacked.length === 20 && ships.killed.length < 20) {
         alert('You won!')
     }
 }
@@ -157,7 +149,7 @@ function computerAttack() {
         } else {
             ships.attacked.push(elementTarget)
             elementTarget.style.backgroundColor = 'rgb(6, 14, 138)'
-            console.log('copy element')
+            // console.log('copy element')
         }
     }
     else {
@@ -165,13 +157,12 @@ function computerAttack() {
             ships.attacked.push(elementTarget)
             ships.killed.push(elementTarget)
             elementTarget.style.backgroundColor = 'black'
-            console.log('unique element')
+            // console.log('unique element')
         } else {
             ships.attacked.push(elementTarget)
             elementTarget.style.backgroundColor = 'rgb(6, 14, 138)'
         }
     }
-    console.log('ships.killed', ships.killed.length)
     
     if(ships.killed.length === 20 && enemyShips.attacked.length < 20) {
         alert('computer won!')
@@ -194,11 +185,13 @@ function startBattle() {
         fieldsSection.style.justifyContent = 'start'
         gameName.style.transform = 'rotate(270deg)'
         gameName.style.color = 'rgb(240, 50, 2)'
+        battleBtn.style.display = 'none'
         randomSettingShips(enemyField)
         for(let i = 1; i < enemyField.rows.length - 1; i++) {
             for(let j = 1; j < enemyField.rows[i].cells.length - 1; j++)
             enemyField.rows[i].cells[j].classList.add('cellHidden')
         }
+        
     } else {
         alert('Установите все корабли')
     }
@@ -281,7 +274,7 @@ function randomSettingEachType(type, field, objectShips) {
             elementTarget = field.rows[randomVertical].cells[randomHorizontal],
             flag = true
         while(typeShip.length < i + 1) {
-            console.log('while')
+            console.log('')
             setDirection()
             if(flag) {
                 toggleTypeShip(elementTarget, randomVertical, randomHorizontal, field, objectShips, shipDirection)
@@ -368,7 +361,6 @@ function setDouble(elem, elemRow, elemColumn, field, objectShips, direction) {
 }
 
 function setTriple(elem, elemRow, elemColumn, field, objectShips, direction) {
-    console.log('direction', direction)
     if(shipDirection === 'horizontal') {
         setHorizontalShips(elem, elemRow, elemColumn, 3, field, objectShips, direction)
     } else {
@@ -516,7 +508,6 @@ function createBorderShip(row, column, type, field, objectShips, direction) {
             field.rows[row + 1].cells[column + i].classList.add('blockCells')
             field.rows[row + 1].cells[column + i].classList.remove('cellHidden')
             field.rows[row - 1].cells[column + i].classList.remove('cellHidden')
-            console.log('remove',field.rows[row - 1].cells[column + i])
 
             objectShips.blockCeils = [...objectShips.blockCeils, field.rows[row - 1].cells[column + i], field.rows[row + 1].cells[column + i]]
         }
