@@ -37,6 +37,12 @@ let enemyShips = {
     attacked: []
 }
 
+let tagTr = document.createElement('tr')
+let tagTd = document.createElement('td')
+
+
+createTagTr()
+
 makeInactiveCells()
 
 myField.addEventListener('click', switchTypeShip)
@@ -57,7 +63,22 @@ battleBtn.addEventListener('click', startBattle)
 
 enemyField.addEventListener('click', battleOn)
 
+function createTagTd(tr) {
+    for (let i = 0; i < 12; i++) {
+        let tagTd = document.createElement('td')
+        tr.appendChild(tagTd)
+    }
+}
 
+function createTagTr() {
+    for (let i = 0; i < 12; i++) {
+        for(let j = 0; j < fields.length; j++) {
+            let tagTr = document.createElement('tr')
+            createTagTd(tagTr)
+            fields[j].appendChild(tagTr)
+        }
+    }
+}
 
 function fieldMouseOn(event) {
     if(event.target.tagName !== 'TD') return;
@@ -96,7 +117,7 @@ function myAttack(e) {
     if (e.target.classList.contains('cellShipBg') && e.target.classList.contains('cellHidden')) {
         e.target.classList.remove('cellHidden')
         enemyShips.attacked.push(e.target)
-
+        
         let counter = 0
         let arrDirection =[]
 
@@ -133,6 +154,7 @@ function myAttack(e) {
 }
 
 function computerAttack() {
+    console.log('work')
     let randomHorizontal = getRandomInt(1, 11)
     let randomVertical = getRandomInt(1, 11)
     let elementTarget = myField.rows[randomVertical].cells[randomHorizontal]
@@ -146,6 +168,8 @@ function computerAttack() {
             ships.attacked.push(elementTarget)
             ships.killed.push(elementTarget)
             elementTarget.style.backgroundColor = 'black'
+            console.log('hit')
+            setTimeout(computerAttack, 1000)
         } else {
             ships.attacked.push(elementTarget)
             elementTarget.style.backgroundColor = 'rgb(6, 14, 138)'
@@ -157,6 +181,7 @@ function computerAttack() {
             ships.attacked.push(elementTarget)
             ships.killed.push(elementTarget)
             elementTarget.style.backgroundColor = 'black'
+            setTimeout(computerAttack, 1000)
             // console.log('unique element')
         } else {
             ships.attacked.push(elementTarget)
@@ -170,8 +195,12 @@ function computerAttack() {
 }
 
 function battleOn(e) {
-    myAttack(e)
-    setTimeout(computerAttack, 1000)
+    if (e.target.classList.contains('cellShipBg') && e.target.classList.contains('cellHidden')) {
+        myAttack(e)
+    } else {
+        myAttack(e)
+        setTimeout(computerAttack, 1000)
+    }
 }
 
 function startBattle() {
@@ -273,8 +302,13 @@ function randomSettingEachType(type, field, objectShips) {
             randomVertical = getRandomInt(1, maxValue),
             elementTarget = field.rows[randomVertical].cells[randomHorizontal],
             flag = true
+        let counter = 0
         while(typeShip.length < i + 1) {
-            console.log('')
+            counter++
+            if(counter > 5000) {
+                alert('Достройте недостающие корабли')
+                break;
+            }
             setDirection()
             if(flag) {
                 toggleTypeShip(elementTarget, randomVertical, randomHorizontal, field, objectShips, shipDirection)
@@ -298,32 +332,46 @@ function getRandomInt(min, max) {
 function switchTypeShip(event) {
     for(item of typeShipInputs) {
         if (item.checked) {
-            shipTypeValue = item.value
+            shipType = item
         }
     }
     let direction = shipDirection
-    setMaxShipValue(event, shipTypeValue, direction)
+    setMaxShipValue(event, shipType, direction)
 }
 
-function setMaxShipValue(e, value, direction) {
+function setMaxShipValue(e, shipTypeButton, direction) {
     const elem = e.target,
           elemRow = elem.parentElement.rowIndex,
           elemColumn = elem.cellIndex
-
-    if (value === '1' && ships.monoShips.length < 4) {
+    
+    if (shipTypeButton.value === '1' && ships.monoShips.length < 4) {
         setMono(elem, elemRow, elemColumn, myField, ships, direction)
+        if(ships.monoShips.length === 4) {
+            shipTypeButton.disabled = true
+        }
     }
-    else if (value === '2' && ships.doubleShips.length < 3) {
+    else if (shipTypeButton.value === '2' && ships.doubleShips.length < 3) {
         setDouble(elem, elemRow, elemColumn, myField, ships, direction)
+        if(ships.doubleShips.length === 3) {
+            shipTypeButton.disabled = true
+        }
     }
-    else if (value === '3' && ships.tripleShips.length < 2) {
+    else if (shipTypeButton.value === '3' && ships.tripleShips.length < 2) {
         setTriple(elem, elemRow, elemColumn, myField, ships, direction)
+        if(ships.tripleShips.length === 2) {
+            shipTypeButton.disabled = true
+            
+        }
     }
-    else if (value === '4' && ships.quadroShips.length < 1) {
+    else if (shipTypeButton.value === '4' && ships.quadroShips.length < 1) {
         setQuadro(elem, elemRow, elemColumn, myField, ships, direction)
+        if(ships.quadroShips.length === 1) {
+            shipTypeButton.disabled = true
+        }
     } 
     else {
-        alert('Установлено максимальное количество кораблей данного типа')
+        
+        // alert('Установлено максимальное количество кораблей данного типа')
     }
 }
 
@@ -503,13 +551,13 @@ function createBorderShip(row, column, type, field, objectShips, direction) {
     let topCell = field.rows[row - 1] 
 
     if(direction === 'horizontal') {
-        for(i = 0; i < type; i++) {
-            field.rows[row - 1].cells[column + i].classList.add('blockCells')
-            field.rows[row + 1].cells[column + i].classList.add('blockCells')
-            field.rows[row + 1].cells[column + i].classList.remove('cellHidden')
-            field.rows[row - 1].cells[column + i].classList.remove('cellHidden')
+        for(i = 0; i < type + 2; i++) {
+            field.rows[row - 1].cells[column - 1 + i].classList.add('blockCells')
+            field.rows[row + 1].cells[column - 1 + i].classList.add('blockCells')
+            field.rows[row + 1].cells[column - 1 + i].classList.remove('cellHidden')
+            field.rows[row - 1].cells[column - 1 + i].classList.remove('cellHidden')
 
-            objectShips.blockCeils = [...objectShips.blockCeils, field.rows[row - 1].cells[column + i], field.rows[row + 1].cells[column + i]]
+            objectShips.blockCeils = [...objectShips.blockCeils, field.rows[row - 1].cells[column - 1 + i], field.rows[row + 1].cells[column - 1 + i]]
         }
         leftCell.classList.add('blockCells')
         leftCell.classList.remove('cellHidden')
@@ -520,12 +568,12 @@ function createBorderShip(row, column, type, field, objectShips, direction) {
     
         objectShips.blockCeils = objectShips.blockCeils.filter((item, index, arr) => arr.indexOf(item) === index)
     } else {
-        for(i = 0; i < type; i++) {
-            field.rows[row + i].cells[column - 1].classList.add('blockCells')
-            field.rows[row + i].cells[column + 1].classList.add('blockCells')
-            field.rows[row + i].cells[column - 1].classList.remove('cellHidden')
-            field.rows[row + i].cells[column + 1].classList.remove('cellHidden')
-            objectShips.blockCeils = [...objectShips.blockCeils, field.rows[row + i].cells[column - 1], field.rows[row + i].cells[column + 1]]
+        for(i = 0; i < type + 2; i++) {
+            field.rows[row - 1 + i].cells[column - 1].classList.add('blockCells')
+            field.rows[row - 1 + i].cells[column + 1].classList.add('blockCells')
+            field.rows[row - 1 + i].cells[column - 1].classList.remove('cellHidden')
+            field.rows[row - 1 + i].cells[column + 1].classList.remove('cellHidden')
+            objectShips.blockCeils = [...objectShips.blockCeils, field.rows[row - 1 + i].cells[column - 1], field.rows[row - 1 + i].cells[column + 1]]
         }
         topCell.cells[column].classList.add('blockCells')
         topCell.cells[column].classList.remove('cellHidden')
