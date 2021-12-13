@@ -250,7 +250,7 @@ function randomSettingShips(field) {
     } else {
         objectShips = enemyShips
     }
-    for(let i = 1; i < 5; i++) {
+    for(let i = 4; i > 0; i--) {
         randomSettingEachType(i, field, objectShips)
     }
 }
